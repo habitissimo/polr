@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Http\Redirect;
 
@@ -28,23 +29,48 @@ class LinkController extends Controller {
         // Validate URL form data
         $this->validate($request, [
             'link-url' => 'required|url',
-            'custom-ending' => 'alpha_dash'
+            'custom-ending' => 'alpha_dash',
+            'link-expiration-date' => 'date_format:"Y-m-d"',
+            'link-fallback-url' => 'url',
         ]);
 
         $long_url = $request->input('link-url');
         $custom_ending = $request->input('custom-ending');
         $is_secret = ($request->input('options') == "s" ? true : false);
+        $expiration_date = $request->input('link-expiration-date');
+        $fallback_url = $request->input('link-fallback-url');
         $creator = session('username');
         $link_ip = $request->ip();
 
         try {
-            $short_url = LinkFactory::createLink($long_url, $is_secret, $custom_ending, $link_ip, $creator);
+            $short_url = LinkFactory::createLink(
+                $long_url,
+                $is_secret,
+                $custom_ending,
+                $link_ip,
+                $creator,
+                $expiration_date,
+                $fallback_url
+            );
         }
         catch (\Exception $e) {
             return self::renderError($e->getMessage());
         }
 
         return view('shorten_result', ['short_url' => $short_url]);
+    }
+
+    protected function handleInvalidLink(Link $link, $error_msg) {
+
+      if ($link->fallback_url) {
+        return redirect($link->fallback_url, 301);
+      }
+
+      if (env('SETTING_REDIRECT_404')) {
+        return abort(404);
+      }
+
+      return view('error', ['message' => $error_msg]);
     }
 
     public function performRedirect(Request $request, $short_url, $secret_key=false) {
@@ -59,13 +85,16 @@ class LinkController extends Controller {
         // Return an error if the link has been disabled
         // or return a 404 if SETTING_REDIRECT_404 is set to true
         if ($link->is_disabled == 1) {
-            if (env('SETTING_REDIRECT_404')) {
-                return abort(404);
-            }
+            return $this->handleInvalidLink($link, 'Sorry, but this link has been disabled by an administrator.');
+        }
 
-            return view('error', [
-                'message' => 'Sorry, but this link has been disabled by an administrator.'
-            ]);
+        // Return 404 if link has expired
+        if ($link->expiration_date) {
+          $expiration_date = new DateTime($link->expiration_date);
+          $now = new DateTime('now');
+          if ($expiration_date  < $now) {
+            return $this->handleInvalidLink($link, 'Sorry, but this link has expired.');
+          }
         }
 
         // Return a 403 if the secret key is incorrect

@@ -90,7 +90,17 @@ class AdminPaginationController extends Controller {
     public function paginateAdminLinks(Request $request) {
         self::ensureAdmin();
 
-        $admin_links = Link::select(['short_url', 'long_url', 'clicks', 'created_at', 'creator', 'is_disabled']);
+        $admin_links = Link::select([
+          'short_url',
+          'long_url',
+          'clicks',
+          'created_at',
+          'expiration_date',
+          'fallback_url',
+          'creator',
+          'is_disabled'
+        ]);
+
         return Datatables::of($admin_links)
             ->addColumn('disable', function ($link) {
                 // Add "Disable/Enable" action buttons
@@ -133,7 +143,7 @@ class AdminPaginationController extends Controller {
 
         $username = session('username');
         $user_links = Link::where('creator', $username)
-            ->select(['short_url', 'long_url', 'clicks', 'created_at']);
+            ->select(['short_url', 'long_url', 'clicks', 'created_at', 'expiration_date', 'fallback_url']);
 
         return Datatables::of($user_links)
             ->editColumn('clicks', function ($link) {

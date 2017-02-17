@@ -36,10 +36,26 @@ class LinkHelperTest extends TestCase
     }
 
     public function testLinkExists() {
-        $link = LinkFactory::createLink('http://example.com/ci', true, null, '127.0.0.1', false, true);
+        $link = LinkFactory::createLink('http://example.com/ci', true, null, '127.0.0.1', false, null, true);
         // assert that existent link ending returns true
         $this->assertNotEquals(LinkHelper::linkExists($link->short_url), false);
         // assert that nonexistent link ending returns false
         $this->assertEquals(LinkHelper::linkExists('nonexistent'), false);
+    }
+
+    public function testLinkExpirationDate() {
+      $link_expiration = new DateTime('yesterday');
+      $link = LinkFactory::createLink(
+          'http://example.com/ci',
+          true,
+          null,
+          '127.0.0.1',
+          false,
+          $link_expiration->format('Y-m-d'),
+          true
+      );
+
+      $this->assertTrue($link->isExpired());
+
     }
 }

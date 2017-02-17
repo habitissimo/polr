@@ -8,8 +8,7 @@
 <h1 class='title'>{{env('APP_NAME')}}</h1>
 
 <form method='POST' action='/shorten' role='form'>
-    <input type='url' autocomplete='off'
-        class='form-control long-link-input' placeholder='http://' name='link-url' />
+    <input type='url' autocomplete='off' class='form-control long-link-input' placeholder='http://' name='link-url' />
 
     <div class='row' id='options' ng-cloak>
         <p>Customize link</p>
@@ -36,7 +35,16 @@
                 <div id='link-availability-status'></div>
             </div>
         </div>
-    </div>
+        <div>
+            <p>Expiration date</p>
+            <input type='date' autocomplete='off' class='form-control long-link-input' name='link-expiration-date' />
+        </div>
+        <div>
+            <p>Fallback URL</p>
+            <input type='url' autocomplete='off' class='form-control long-link-input' placeholder='http://' name='link-fallback-url' />
+        </div>
+        </div>
+
     <input type='submit' class='btn btn-info' id='shorten' value='Shorten' />
     <a href='#' class='btn btn-warning' id='show-link-options'>Link Options</a>
     <input type="hidden" name='_token' value='{{csrf_token()}}' />

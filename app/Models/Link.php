@@ -1,5 +1,6 @@
 <?php
 namespace App\Models;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 
 class Link extends Model {
@@ -26,5 +27,15 @@ class Link extends Model {
         return $query
             ->where('long_url_hash', $crc32_hash)
             ->where('long_url', $long_url);
+    }
+
+    public function isExpired() {
+      if (!$this->expiration_date) {
+        return false;
+      }
+
+      $now = new DateTime('now');
+      $expiration_date = new DateTime($this->expiration_date);
+      return $now > $expiration_date;
     }
 }

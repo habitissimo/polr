@@ -15,7 +15,9 @@ class ApiLinkController extends ApiController {
         $validator = \Validator::make(array_merge([
             'url' => str_replace(' ', '%20', $request->input('url'))
         ], $request->except('url')), [
-            'url' => 'required|url'
+            'url'             => 'required|url',
+            'expiration_date' => 'date_format:"Y-m-d"',
+            'fallback_url'    => 'url',
         ]);
 
         if ($validator->fails()) {
@@ -27,9 +29,21 @@ class ApiLinkController extends ApiController {
 
         $link_ip = $request->ip();
         $custom_ending = $request->input('custom_ending');
+        $expiration_date = $request->input('expiration_date');
+        $fallback_url = $request->input('fallback_url');
 
         try {
-            $formatted_link = LinkFactory::createLink($long_url, $is_secret, $custom_ending, $link_ip, $user->username, false, true);
+            $formatted_link = LinkFactory::createLink(
+                $long_url,
+                $is_secret,
+                $custom_ending,
+                $link_ip,
+                $user->username,
+                $expiration_date,
+                $fallback_url,
+                false,
+                true
+            );
         }
         catch (\Exception $e) {
             abort(400, $e->getMessage());
@@ -70,7 +84,7 @@ class ApiLinkController extends ApiController {
                 'created_at' => $link['created_at'],
                 'clicks' => $link['clicks'],
                 'updated_at' => $link['updated_at'],
-                'created_at' => $link['created_at']
+                'expiration_date'  => $link['expiration_date'],
             ], 'lookup', $response_type, $link['long_url']);
         }
         else {

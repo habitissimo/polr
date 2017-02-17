@@ -5,6 +5,8 @@
             <th>Long Link</th>
             <th>Clicks</th>
             <th>Date</th>
+            <th>Expiration</th>
+            <th>Fallback URL</th>
             @if ($table_id == "admin_links_table")
             {{-- Show action buttons only if admin view --}}
             <th>Creator</th>

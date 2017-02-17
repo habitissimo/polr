@@ -49,6 +49,8 @@ polr.controller('AdminCtrl', function($scope, $compile) {
                     {className: 'wrap-text', data: 'long_url', name: 'long_url'},
                     {data: 'clicks', name: 'clicks'},
                     {data: 'created_at', name: 'created_at'},
+                    {data: 'expiration_date', name: 'expiration_date'},
+                    {data: 'fallback_url', name: 'fallback_url'},
                     {data: 'creator', name: 'creator'},
 
                     {data: 'disable', name: 'disable', orderable: false, searchable: false},
@@ -65,7 +67,9 @@ polr.controller('AdminCtrl', function($scope, $compile) {
                 {className: 'wrap-text', data: 'short_url', name: 'short_url'},
                 {className: 'wrap-text', data: 'long_url', name: 'long_url'},
                 {data: 'clicks', name: 'clicks'},
-                {data: 'created_at', name: 'created_at'}
+                {data: 'created_at', name: 'created_at'},
+                {data: 'expiration_date', name: 'expiration_date'},
+                {data: 'fallback_url', name: 'fallback_url'}
             ]
         }, datatables_config));
     };
